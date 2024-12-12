@@ -1,0 +1,25 @@
+# assuming the project is run with maven, can be changed to openjdk:17-jdk-slim
+FROM maven:3.6.0-jdk-8
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# install whatever other packages are needed
+
+COPY . /app
+
+#assuming the project runs with maven but this can be changed to whatever is needed
+
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Expose port for crawlers to connect
+EXPOSE 8080
+
+CMD ["mvn", "spring-boot:run"]

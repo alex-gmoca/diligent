@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  zip-folders
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Architectures:
+      - x86_64
+    Runtime: python3.9
+    Handler: app.lambda_handler
+
+Resources:
+  RequestZipFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: request_zip/
+      Environment:
+        Variables:
+          zip_queue_url: !GetAtt ZipQueue.Arn
+      Events:
+        RequestZip:
+          Type: Api 
+          Properties:
+            Path: /request_download
+            Method: post
+
+  GenerateZipFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: generate_zip/
+      Events:
+        GenerateObject:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ZipQueue.Arn
+
+  GetZipFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: get_zip/
+      Events:
+        DownloadObject:
+          Type: Api 
+          Properties:
+            Path: /download/{job_id}
+            Method: get
+
+  ZipQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ZipQueue
+
+

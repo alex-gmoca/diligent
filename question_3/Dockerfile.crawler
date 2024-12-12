@@ -1,0 +1,36 @@
+#this can be customized depending on the crawler needs
+FROM ubuntu:latest
+
+WORKDIR /app
+
+# install whatever packages are needed
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+
+ARG CHROMIUM_FLAGS
+ARG CONTROLLER_HOSTNAME
+ARG CONTROLLER_PORT
+ARG JOB_ID
+ARG JOB_PARAMETERS
+
+ENV CHROMIUM_FLAGS=${CHROMIUM_FLAGS}
+ENV CONTROLLER_HOSTNAME=${CONTROLLER_HOSTNAME}
+ENV CONTROLLER_PORT=${CONTROLLER_PORT}
+ENV JOB_ID=${JOB_ID}
+ENV JOB_PARAMETERS=${JOB_PARAMETERS}
+
+#change for the actual crawler "install/build command"
+RUN command_to_install 
+
+# After the crawler installs and runs Chromium
+# we run a script to intercept and restart Chromium
+# with the desired flags
+COPY process_interceptor.sh /app/process_interceptor.sh
+RUN chmod +x /app/process_interceptor.sh
+
+CMD [sh, /app/process_interceptor.sh, "original_run_command", "$CHROMIUM_FLAGS"]

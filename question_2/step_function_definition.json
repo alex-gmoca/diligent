@@ -1,0 +1,34 @@
+{
+  "Comment": "A state machine to run arbitrary code.",
+  "StartAt": "RunCode",
+  "States": {
+    "RunCode":{
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "arbitrary-code-runner-cluster",
+        "TaskDefinition": "arbitrary-code-runner-task",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "Subnets": ["subnet-123456"]
+          }
+        }
+      },
+      "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "code-runner",
+              "Environment": [
+                {
+                  "Name": "SCRIPT_ID",
+                  "Value.$": "$.script_id"
+                }
+              ]
+            }
+          ]
+        },
+      "End": true
+    }
+  }
+}
