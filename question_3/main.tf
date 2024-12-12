@@ -96,17 +96,17 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# resource "aws_ecs_service" "controller_service" {
-#   name            = "controller-service"
-#   cluster         = aws_ecs_cluster.fargate_cluster.id
-#   task_definition = aws_ecs_task_definition.controller_task.arn
-#   launch_type     = "FARGATE"
+resource "aws_ecs_service" "controller_service" {
+  name            = "controller-service"
+  cluster         = aws_ecs_cluster.fargate_cluster.id
+  task_definition = aws_ecs_task_definition.controller_task.arn
+  launch_type     = "FARGATE"
 
-#   network_configuration {
-#     subnets         = aws_subnet.private.*.id
-#     security_groups = [aws_security_group.ecs_security_group.id]
-#   }
-# }
+  network_configuration {
+    subnets         = aws_subnet.private.*.id
+    security_groups = [aws_security_group.ecs_security_group.id]
+  }
+}
 
 # resource "aws_ecs_service" "crawler_service" {
 #   name            = "crawler-service"
