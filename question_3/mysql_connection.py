@@ -50,5 +50,34 @@ class MySQL:
             """), (max_idle_time)
             return cursor.fetchall()
 
+    def initiate_hosts_table(self, hosts):
+        with self.connection.cursor() as cursor:
+            #clears the table before inserting
+            cursor.execute("DELETE from hosts")
+            for host in hosts:
+                cursor.execute("""
+                    INSERT INTO hosts (hostname, port, available)
+                    VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE port = %s, available = %s
+                """, (host['hostname'], host['port'], True, host['port'], True))
+            conn.commit()
+
+    def check_host_availability(self):
+        return self.connection.cursor().execute("""
+            SELECT hostname
+            FROM hosts
+            WHERE available = 1
+            LIMIT 1
+        """).fetchone()
+
+    def change_host_availability(self, host, available):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE hosts
+                SET available = %s
+                WHERE hostname = %s
+            """, (available, host))
+            conn.commit()
+
     def close(self):
         self.connection.close()

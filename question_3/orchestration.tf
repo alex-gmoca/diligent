@@ -1,5 +1,5 @@
 provider "docker" {
-  host = "unix:///var/run/docker.sock"
+  host = "unix:///Users/alejandro.gomez/.docker/run/docker.sock"
 }
 
 resource "docker_container" "orchestrator" {
@@ -9,7 +9,8 @@ resource "docker_container" "orchestrator" {
     "fargate_cluster=data.aws_ecs_cluster.fargate_cluster.id",
     "task_definition=data.aws_ecs_task_definition.crawler_task.arn",
     "subnet_id=data.aws_subnet.private.*.id",
-    "max_workers=var.number_of_crawlers",
-    "max_idle_time=var.max_idle_time"
+    "max_idle_time=var.max_idle_time",
+    "crawler_hostnames=var.crawler_hostnames",
+    "target_group_arns=local.target_group_arns"
   ]
 }

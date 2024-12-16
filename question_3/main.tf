@@ -64,9 +64,9 @@ resource "aws_ecs_task_definition" "crawler_task" {
       essential = true
       env = ["CHROMIUM_FLAGS=${var.chromium_flags}", "CONTROLLER_HOSTNAME=${var.controller_hostname}", "CONTROLLER_PORT=${var.crawler_port}"] 
       portMappings = [
-        {
-          containerPort = var.crawler_port
-          hostPort      = var.crawler_port
+        for host in var.crawler_hostnames : {
+          containerPort = host.port
+          hostPort      = host.port
           protocol      = "tcp"
         }
       ]
@@ -157,3 +157,24 @@ resource "aws_subnet" "private" {
   cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
 }
 
+resource "aws_lb" "main_lb" {
+  name = "main-lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.ecs_security_group.id]
+  subnets = aws_subnet.private.*.id
+}
+
+#one target group per hostname
+resource "aws_lb_target_group" "crawler_target_group" {
+  for_each = { for obj in var.crawler_hostnames : obj.hostname => obj }
+  name = "tg-${each.key}"
+  port = var.crawler_port
+  protocol = "HTTP"
+  vpc_id = aws_vpc.main.id
+}
+
+#gather all arns to pass to the orchestrator container
+locals {
+  target_group_arns = [for tg in aws_lb_target_group.crawler_target_group : tg.arn]
+}

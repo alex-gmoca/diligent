@@ -54,3 +54,11 @@ variable "orchestrator_image" {
     type = string
     description = "Docker image for the orchestrator"
 }
+
+variable "crawler_hostnames" {
+    type = set(object({
+        hostname = string
+        port = number
+    }))
+    description = "List of crawler hostnames and ports"
+}
