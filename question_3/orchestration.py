@@ -82,17 +82,15 @@ def stop_idle_jobs(idle_jobs, current_host):
 # Orchestration loop
 def scan_jobs():
     mysql_connection = MySQL()
-    #create internal dict for availability, this could live on the DB also
-    hosts = {
-        host['hostname'] : {
-            "hostname": host['hostname'],
-            "port": host['port'],
-            "target_group_arn": TARGET_GROUP_ARNS[host['hostname']]
-        }
-        for host in HOSTNAMES
-    }
-
     #if needed initiate the hosts table
+    # hosts = {
+    #     host['hostname'] : {
+    #         "hostname": host['hostname'],
+    #         "port": host['port'],
+    #         "target_group_arn": TARGET_GROUP_ARNS[host['hostname']]
+    #     }
+    #     for host in HOSTNAMES
+    # }
     #mysql_connection.initiate_hosts_table(hosts)
 
     current_host = None
